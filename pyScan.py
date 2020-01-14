@@ -84,7 +84,7 @@ def enumnetwork():
 def verifyconnection():
     cmd = "ip addr | grep 'state UP' -A2"
     status = os.system(cmd)
-    if status == 0:
+    if status < 256:
         constat.set("Connected")
         btn['state'] = NORMAL
     else:
@@ -113,14 +113,7 @@ def scanip(ip):
     nm.scan(ip, '1-65535')
     scanip = nm.csv().replace(";", " ")
     return scanip
-    
-def test(ln):
-    ip = str()
-    for x in ln.curselection():
-        ip = str(x)
-    print(ip)
-    return ip
-    
+      
 def scanselectip(entry, textwidget):
     x = entry.get()
     nm = nmap.PortScanner()
@@ -150,7 +143,7 @@ lb.insert(5, "Exit")
 btn = Button(window, text="Submit", command=menuselect, state=DISABLED)
 btn2 = Button(window, text="Connection Retry", command=verifyconnection)
 
-if verifyconnection() == 0:
+if verifyconnection() < 256:
     constat.set("Connected")
 else:
     constat.set("Not Connected")
@@ -161,4 +154,3 @@ lb.pack()
 btn.pack()
 btn2.pack()
 mainloop()
-
