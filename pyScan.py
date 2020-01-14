@@ -3,34 +3,70 @@ import subprocess
 import time
 import os
 import nmap
+import sys
 
-def curselect():
-    if 0 in lb.curselection():
-        popup = Toplevel()
-        tv = StringVar()
-        popupmsg = Label(popup, textvariable=tv)
-        tv.set(str(machineip()))
-        popupmsg.pack()
-        popup.mainloop()
+def menuselect():
+    for x in lb.curselection():
+        if x == 0:
+            popup0 = Toplevel()
+            lis0 = Listbox(popup0, selectmode=SINGLE, height=len(machineip()), width=20)
+            for x in machineip():
+                n = 0
+                lis0.insert(n, x)
+                n+=1
+            lis0.pack()
+            popup0.mainloop()
+            
+        if x == 1:
+            popup1 = Toplevel()
+            lis1 = Listbox(popup1, selectmode=SINGLE, height=10, width=20)
+            for x in enumnetwork():
+                n = 0
+                lis1.insert(n, x)
+                n+=1
+            lis1.pack()
+            popup1.mainloop()     
+            
+        if x == 2:            
+            popup2 = Toplevel()
+            pscroll2 = Scrollbar(popup2)
+            pscroll2.pack(side=RIGHT, fill=Y)
+            text2 = Text(popup2, wrap=NONE, yscrollcommand=pscroll2.set, height=40, width=100)
+            for x2 in enumnetwork():
+               result = scanip(x2)
+               text2.insert("1.0", result)
+            text2.pack(side="left")
+            popup2.mainloop()
         
-    if 2 in lb.curselection():
-        popup = Toplevel()
-        lis = Listbox(popup, selectmode=SINGLE, height=len(enumnetwork()), width=20)
-        for x in enumnetwork():
-            n = 0
-            lis.insert(n, x)
-            n+=1
-        lis.pack()
-        popup.mainloop()        
+        if x == 3:
+            popup3 = Toplevel()            
+            pscroll3 = Scrollbar(popup3)
+            pscroll3.pack(side=RIGHT, fill=Y)
+            lbl3 = Label(popup3, text="Enter manual IP to scan")
+            ipentry = Entry(popup3)
+            btn3 = Button(popup3, text="Submit", command=lambda : scanselectip(ipentry, text3))
+            text3 = Text(popup3, wrap=NONE, yscrollcommand=pscroll3.set, height=20, width=60)
+            lbl3.pack()
+            ipentry.pack()
+            btn3.pack()  
+            text3.pack()
+            popup3.mainloop()
         
-def discover(text, lname):
+        if x == 4:
+            print("Coming Soon")
+            
+        if x == 5:
+            window.destroy()
+            sys.exit(1)
+            
+def discover(text, listname):
     start = -1
     locs = []
     
     text
     while True:
         try:
-            loc = lname.index(text, start+1)
+            loc = listname.index(text, start+1)
         except ValueError:
             break
         else:
@@ -72,6 +108,27 @@ def machineip():
         
     return i
 
+def scanip(ip):
+    nm = nmap.PortScanner()
+    nm.scan(ip, '1-65535')
+    scanip = nm.csv().replace(";", " ")
+    return scanip
+    
+def test(ln):
+    ip = str()
+    for x in ln.curselection():
+        ip = str(x)
+    print(ip)
+    return ip
+    
+def scanselectip(entry, textwidget):
+    x = entry.get()
+    nm = nmap.PortScanner()
+    nm.scan(x, '1-65535')
+    result = nm.csv().replace(";", " ")
+    textwidget.insert("1.0", result) 
+       
+        
 window = Tk()
 
 window.title("pyScan")
@@ -82,15 +139,15 @@ constat = StringVar()
 lbl = Label(window, text="Select an Action")
 lbl2 = Label(window, textvariable=constat)
 
-lb = Listbox(window, selectmode=SINGLE, height=7, width=40)
+lb = Listbox(window, selectmode=SINGLE, height=7, width=55)
 lb.insert(0, "Display current machine's IP")
-lb.insert(1, "Manual nmap command")
-lb.insert(2, "Enumerate all IPs on network")
-lb.insert(3, "Discover ports & enumerate OS/services on all IPs")
+lb.insert(1, "Enumerate all IPs on network")
+lb.insert(2, "Discover ports & enumerate OS/services on all IPs")
+lb.insert(3, "Scan ports & enumerate on manual IP")
 lb.insert(4, "Vulnerability scan all devices on network")
 lb.insert(5, "Exit")
 
-btn = Button(window, text="Submit", command=curselect, state=DISABLED)
+btn = Button(window, text="Submit", command=menuselect, state=DISABLED)
 btn2 = Button(window, text="Connection Retry", command=verifyconnection)
 
 if verifyconnection() == 0:
@@ -98,8 +155,8 @@ if verifyconnection() == 0:
 else:
     constat.set("Not Connected")
   
-lbl.pack()
 lbl2.pack()
+lbl.pack()
 lb.pack()
 btn.pack()
 btn2.pack()
