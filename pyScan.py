@@ -9,7 +9,7 @@ def menuselect():
     for x in lb.curselection():
         if x == 0:
             popup0 = Toplevel()
-            lis0 = Listbox(popup0, selectmode=SINGLE, height=len(machineip()), width=20)
+            lis0 = Listbox(popup0, selectmode=SINGLE, height=5, width=20)
             for x in machineip():
                 n = 0
                 lis0.insert(n, x)
@@ -19,21 +19,23 @@ def menuselect():
             
         if x == 1:
             popup1 = Toplevel()
-            lis1 = Listbox(popup1, selectmode=SINGLE, height=10, width=20)
+            pscroll1 = Scrollbar(popup1)
+            pscroll1.pack(side=RIGHT, fill=Y)
+            lis1 = Listbox(popup1, selectmode=SINGLE, yscrollcommand=pscroll1.set, height=10, width=20)
             for x in enumnetwork():
                 n = 0
                 lis1.insert(n, x)
                 n+=1
             lis1.pack()
-            popup1.mainloop()     
+            popup1.mainloop()   
             
         if x == 2:            
             popup2 = Toplevel()
             pscroll2 = Scrollbar(popup2)
             pscroll2.pack(side=RIGHT, fill=Y)
             text2 = Text(popup2, wrap=NONE, yscrollcommand=pscroll2.set, height=40, width=100)
-            for x2 in enumnetwork():
-               result = scanip(x2)
+            for x in enumnetwork():
+               result = scanip(x)
                text2.insert("1.0", result)
             text2.pack(side="left")
             popup2.mainloop()
@@ -62,8 +64,6 @@ def menuselect():
 def discover(text, listname):
     start = -1
     locs = []
-    
-    text
     while True:
         try:
             loc = listname.index(text, start+1)
@@ -78,7 +78,7 @@ def enumnetwork():
     nm = nmap.PortScanner()
     for x in machineip():
         nm.scan(x, arguments="-sP")
-    hosts = nm.all_hosts()
+        hosts = nm.all_hosts()
     return hosts
         
 def verifyconnection():
@@ -95,17 +95,14 @@ def verifyconnection():
 def machineip():
     process = subprocess.Popen(['ip', 'addr'], stdout=subprocess.PIPE, universal_newlines=True)
     l = str(process.communicate())
-    ls = l.split()
-    
+    ls = l.split()    
     srch = "inet"
-    iploc = discover(srch, ls)
-    
+    iploc = discover(srch, ls)    
     i = []
     for x in iploc:
         i.append(ls[int(x+1)])
         if "127.0.0.1/8" in i:
-            i.remove("127.0.0.1/8")
-        
+            i.remove("127.0.0.1/8")        
     return i
 
 def scanip(ip):
@@ -134,8 +131,8 @@ lbl2 = Label(window, textvariable=constat)
 
 lb = Listbox(window, selectmode=SINGLE, height=7, width=55)
 lb.insert(0, "Display current machine's IP")
-lb.insert(1, "Enumerate all IPs on network")
-lb.insert(2, "Discover ports & enumerate OS/services on all IPs")
+lb.insert(1, "Enumerate all IPs on local subnet")
+lb.insert(2, "Discover ports & enumerate OS/services on all entire local subnet")
 lb.insert(3, "Scan ports & enumerate on manual IP")
 lb.insert(4, "Vulnerability scan all devices on network")
 lb.insert(5, "Exit")
