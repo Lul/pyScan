@@ -1,4 +1,5 @@
 from tkinter import *
+import tkinter as tk
 import subprocess
 import time
 import os
@@ -85,12 +86,13 @@ def verifyconnection():
     cmd = "ip addr | grep 'state UP' -A2"
     status = os.system(cmd)
     if status < 256:
+        lbl2.config(fg='black')
         constat.set("Connected")
-        btn['state'] = NORMAL
+        return True
     else:
+        lbl2.config(fg='red')
         constat.set("Not Connected")
-        btn['state'] = DISABLED
-    return status
+        return False
 
 def machineip():
     process = subprocess.Popen(['ip', 'addr'], stdout=subprocess.PIPE, universal_newlines=True)
@@ -117,7 +119,19 @@ def scanselectip(entry, textwidget):
     nm.scan(x, '1-65535')
     result = nm.csv().replace(";", " ")
     textwidget.insert("1.0", result) 
-       
+    
+def nmapcheck():
+    try:
+        import nmap
+        return True
+    except ImportError:
+        return False
+
+def buttoncheck():
+    if nmapcheck() and verifyconnection():
+        btn['state'] = NORMAL
+    else:
+        btn['state'] = DISABLED
         
 window = Tk()
 
@@ -125,9 +139,11 @@ window.title("pyScan")
 window.geometry('470x270')
 
 constat = StringVar()
+syscheck = StringVar()
 
 lbl = Label(window, text="Select an Action")
 lbl2 = Label(window, textvariable=constat)
+lbl3 = Label(window, textvariable=syscheck)
 
 lb = Listbox(window, selectmode=SINGLE, height=7, width=55)
 lb.insert(0, "Display current machine's IP")
@@ -138,16 +154,28 @@ lb.insert(4, "Vulnerability scan all devices on network")
 lb.insert(5, "Exit")
 
 btn = Button(window, text="Submit", command=menuselect, state=DISABLED)
-btn2 = Button(window, text="Connection Retry", command=verifyconnection)
+btn2 = Button(window, text="Verify Connection & nmap", command=buttoncheck)
 
-if verifyconnection() < 256:
+if verifyconnection():
+    lbl2.config(fg='black')
     constat.set("Connected")
 else:
+    lbl2.config(fg='red')
     constat.set("Not Connected")
+    
+if nmapcheck():
+    lbl3.config(fg='black')
+    syscheck.set("Nmap Module Found")
+    btn['state'] = NORMAL
+else:
+    lbl3.config(fg='red')
+    syscheck.set("Nmap Module NOT Found. Install with 'pip install python3-nmap'")
+    btn['state'] = DISABLED
   
 lbl2.pack()
+lbl3.pack()
 lbl.pack()
 lb.pack()
 btn.pack()
 btn2.pack()
-mainloop()
+window.mainloop()
