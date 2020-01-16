@@ -19,12 +19,12 @@ def menuselect():
             popup0.mainloop()
             
         if x == 1:
+            n = 0
             popup1 = Toplevel()
             pscroll1 = Scrollbar(popup1)
             pscroll1.pack(side=RIGHT, fill=Y)
             lis1 = Listbox(popup1, selectmode=SINGLE, yscrollcommand=pscroll1.set, height=10, width=20)
             for x in enumnetwork():
-                n = 0
                 lis1.insert(n, x)
                 n+=1
             lis1.pack()
@@ -42,15 +42,20 @@ def menuselect():
             popup2.mainloop()
         
         if x == 3:
+            n = 0
             popup3 = Toplevel()            
             pscroll3 = Scrollbar(popup3)
             pscroll3.pack(side=RIGHT, fill=Y)
-            lbl3 = Label(popup3, text="Enter manual IP to scan")
-            ipentry = Entry(popup3)
-            btn3 = Button(popup3, text="Submit", command=lambda : scanselectip(ipentry, text3))
+            lbl3 = Label(popup3, text="Select an IP to scan")
+            listbox3 = Listbox(popup3, selectmode=SINGLE, height=10, width=20)
+            for x in enumnetwork():                
+                listbox3.insert(n, x)
+                n+=1
+            btn3 = Button(popup3, text="Submit", command=lambda : scanselectip(text3, listbox3))
+            #btn3 = Button(popup3, text="Submit", command=lambda : printtest(listbox3))
             text3 = Text(popup3, wrap=NONE, yscrollcommand=pscroll3.set, height=20, width=60)
             lbl3.pack()
-            ipentry.pack()
+            listbox3.pack()
             btn3.pack()  
             text3.pack()
             popup3.mainloop()
@@ -112,11 +117,13 @@ def scanip(ip):
     nm.scan(ip, '1-65535')
     scanip = nm.csv().replace(";", " ")
     return scanip
-      
-def scanselectip(entry, textwidget):
-    x = entry.get()
+        
+def scanselectip(textwidget, listbox):
+    lbsel = str()
+    for x in listbox.curselection():
+        lbsel = listbox.get(x)
     nm = nmap.PortScanner()
-    nm.scan(x, '1-65535')
+    nm.scan(lbsel, '1-65535')
     result = nm.csv().replace(";", " ")
     textwidget.insert("1.0", result) 
     
@@ -148,9 +155,9 @@ lbl3 = Label(window, textvariable=syscheck)
 lb = Listbox(window, selectmode=SINGLE, height=7, width=55)
 lb.insert(0, "Display current machine's IP")
 lb.insert(1, "Enumerate all IPs on local subnet")
-lb.insert(2, "Discover ports & enumerate OS/services on all entire local subnet")
-lb.insert(3, "Scan ports & enumerate on manual IP")
-lb.insert(4, "Vulnerability scan all devices on network")
+lb.insert(2, "Scan ports & enumerate OS/services on entire local subnet")
+lb.insert(3, "Scan ports & enumerate OS/services on local device IP")
+lb.insert(4, "Scan local device IP with script")
 lb.insert(5, "Exit")
 
 btn = Button(window, text="Submit", command=menuselect, state=DISABLED)
