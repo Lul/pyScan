@@ -216,7 +216,7 @@ if verifyconnection():
 else:
     lbl2.config(fg='red')
     constat.set("Not Connected")
-    if nmapcheck():
+if nmapcheck():
     lbl3.config(fg='black')
     syscheck.set("Nmap Module Found")
     btn['state'] = NORMAL
