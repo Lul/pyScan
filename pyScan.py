@@ -6,6 +6,7 @@ import os
 import nmap
 import sys
 
+
 def menuselect():
     for x in lb.curselection():
         if x == 0:
@@ -78,6 +79,7 @@ def menuselect():
             window.destroy()
             sys.exit(1)
             
+
 def discover(text, listname):
     start = -1
     locs = []
@@ -91,6 +93,7 @@ def discover(text, listname):
             start = loc
     return locs
 
+
 def enumnetwork():
     nm = nmap.PortScanner()
     for x in machineip():
@@ -98,6 +101,7 @@ def enumnetwork():
         hosts = nm.all_hosts()
     return hosts
         
+
 def verifyconnection():
     cmd = "ip addr | grep 'state UP' -A2"
     status = os.system(cmd)
@@ -109,6 +113,7 @@ def verifyconnection():
         lbl2.config(fg='red')
         constat.set("Not Connected")
         return False
+
 
 def machineip():
     process = subprocess.Popen(['ip', 'addr'], stdout=subprocess.PIPE, universal_newlines=True)
@@ -123,12 +128,14 @@ def machineip():
             i.remove("127.0.0.1/8")        
     return i
 
+
 def scanip(ip):
     nm = nmap.PortScanner()
     nm.scan(ip, '1-65535')
     scanip = nm.csv().replace(";", " ")
     return scanip
         
+
 def scanselectip(textwidget, listbox):
     lbsel = str()
     for x in listbox.curselection():
@@ -138,6 +145,7 @@ def scanselectip(textwidget, listbox):
     result = nm.csv().replace(";", " ")
     textwidget.insert("1.0", result) 
     
+
 def findscripts():
     scriptlist = []
     for root, dirs, files in os.walk('/usr/share/nmap/scripts/'):
@@ -145,6 +153,7 @@ def findscripts():
             scriptlist.append(name)
     return sorted(scriptlist)    
     
+
 def scriptscan(listbox1, listbox2, textwidget):
     for x in listbox1.curselection():
         lbsel1 = listbox1.get(x)
@@ -155,6 +164,7 @@ def scriptscan(listbox1, listbox2, textwidget):
     result = nm.csv().replace(";", " ")
     textwidget.insert("1.0", result)    
     
+
 def nmapcheck():
     try:
         import nmap
@@ -162,12 +172,17 @@ def nmapcheck():
     except ImportError:
         return False
 
+
 def buttoncheck():
     if nmapcheck() and verifyconnection():
         btn['state'] = NORMAL
     else:
         btn['state'] = DISABLED
         
+
+#Main Loop
+
+
 window = Tk()
 window.title("pyScan")
 window.geometry('%sx%s' % (window.winfo_screenwidth(), window.winfo_screenheight()))
